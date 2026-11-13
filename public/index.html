@@ -15,6 +15,22 @@
   <main>
     <aside>
       <section class="card">
+        <h2>Who are you?</h2>
+        <label for="me">Pick your name to answer</label>
+        <select id="me">
+          <option value="">— I'm the coach / just looking —</option>
+        </select>
+        <form id="player-form" novalidate>
+          <label for="player-name">Not on the list?</label>
+          <div class="row">
+            <input id="player-name" name="name" type="text" maxlength="40" placeholder="Your name">
+            <button type="submit" class="secondary">Add</button>
+          </div>
+          <div id="player-message" class="message" role="status"></div>
+        </form>
+      </section>
+
+      <section class="card">
         <h2>New event</h2>
         <form id="event-form" novalidate>
           <label for="type">Type</label>
