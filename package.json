@@ -1,0 +1,15 @@
+{
+  "name": "convocadas",
+  "version": "0.1.0",
+  "description": "Squad call-ups and attendance for futsal teams",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/*.test.js\""
+  },
+  "license": "MIT"
+}
