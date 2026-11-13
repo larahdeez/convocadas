@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Convocadas</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -64,7 +65,18 @@
     </aside>
 
     <section>
+      <section id="squad-card" class="card" hidden>
+        <h2 id="squad-title">Squad</h2>
+        <div class="squad">
+          <section class="yes"><h3 id="yes-title">Coming</h3><ul id="yes-list"></ul></section>
+          <section class="no"><h3 id="no-title">Not coming</h3><ul id="no-list"></ul></section>
+          <section class="pending"><h3 id="pending-title">No answer yet</h3><ul id="pending-list"></ul></section>
+        </div>
+        <p class="hint">Updates automatically every few seconds.</p>
+      </section>
+
       <h2>Upcoming events</h2>
+      <p class="hint">Click an event to see its squad.</p>
       <ul id="event-list" class="event-list"></ul>
       <p id="event-empty" class="empty" hidden>No events yet. Create the first one.</p>
     </section>
