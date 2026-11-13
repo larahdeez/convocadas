@@ -94,6 +94,7 @@ async function loadMyStatus() {
 $('#me').addEventListener('change', async (e) => {
   state.me = Number(e.target.value) || null;
   savePlayer(state.me);
+  $('#player-message').textContent = '';
   await loadEvents();
 });
 
@@ -141,6 +142,38 @@ function rsvpButtons(event) {
   );
 }
 
+// ---------- US-03 · View the squad ----------
+
+state.selected = null;
+
+function fillList(id, players) {
+  $(id).replaceChildren(...(players.length ? players.map((p) => el('li', {}, p.name)) : [el('li', { class: 'empty' }, '—')]));
+}
+
+async function loadSquad() {
+  const card = $('#squad-card');
+  if (!state.selected) { card.hidden = true; return; }
+  try {
+    const squad = await api('GET', `/api/events/${state.selected}/squad`);
+    $('#squad-title').textContent = `${TYPE_LABEL[squad.event.type]} · ${formatWhen(squad.event)} · ${squad.event.location}`;
+    $('#yes-title').textContent = `Coming (${squad.counts.confirmed})`;
+    $('#no-title').textContent = `Not coming (${squad.counts.absent})`;
+    $('#pending-title').textContent = `No answer yet (${squad.counts.pending})`;
+    fillList('#yes-list', squad.confirmed);
+    fillList('#no-list', squad.absent);
+    fillList('#pending-list', squad.pending);
+    card.hidden = false;
+  } catch {
+    state.selected = null;
+    card.hidden = true;
+  }
+}
+
+function selectEvent(id) {
+  state.selected = id;
+  loadEvents();
+}
+
 // ---------- Event list ----------
 
 async function loadEvents() {
@@ -148,8 +181,8 @@ async function loadEvents() {
   const list = $('#event-list');
   list.replaceChildren(
     ...events.map((event) =>
-      el('li', { class: 'event' },
-        el('div', { class: 'info' },
+      el('li', { class: `event${event.id === state.selected ? ' selected' : ''}` },
+        el('div', { class: 'info', onclick: () => selectEvent(event.id), title: 'See squad' },
           el('div', { class: 'when' }, el('span', { class: `badge ${event.type}` }, TYPE_LABEL[event.type]), formatWhen(event)),
           el('div', { class: 'where' }, `📍 ${event.location}`),
         ),
@@ -158,9 +191,17 @@ async function loadEvents() {
     )
   );
   $('#event-empty').hidden = events.length > 0;
+  if (!state.selected && events.length) state.selected = events[0].id;
+  await loadSquad();
 }
 
 (async () => {
   await loadPlayers();
   await loadEvents();
+  // Refresh so the coach sees new answers without reloading (handy for the two-tab demo).
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    const busy = document.activeElement === $('#me');
+    (busy ? loadEvents() : loadPlayers().then(loadEvents)).catch(() => {});
+  }, 4000);
 })();
