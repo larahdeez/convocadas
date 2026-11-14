@@ -30,8 +30,9 @@ and who hasn't answered yet. It replaces the "who's coming on Saturday?" message
 - **Language:** everything in English: code, UI, error messages, tests and documentation.
 
 ## User stories
-- MVP: US-01 create event · US-02 confirm attendance · US-03 view the squad
-- Backlog: US-04 notifications · US-05 attendance statistics · US-06 AI squad suggestion
+- MVP (v0.1.0): US-01 create event · US-02 confirm attendance · US-03 view the squad
+- v0.2.0: US-05 attendance statistics
+- Backlog: US-04 notifications · US-06 AI squad suggestion
 
 ## Commands
 - `npm start`: start the server
