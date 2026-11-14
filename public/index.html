@@ -79,6 +79,25 @@
       <p class="hint">Click an event to see its squad.</p>
       <ul id="event-list" class="event-list"></ul>
       <p id="event-empty" class="empty" hidden>No events yet. Create the first one.</p>
+
+      <section id="stats-card" class="card stats">
+        <div class="stats-head">
+          <h2>Attendance stats</h2>
+          <select id="stats-type" aria-label="Filter by event type">
+            <option value="">All events</option>
+            <option value="match">Matches</option>
+            <option value="training">Training</option>
+          </select>
+        </div>
+        <p id="stats-summary" class="hint"></p>
+        <table id="stats-table" hidden>
+          <thead>
+            <tr><th>Player</th><th>Coming</th><th>Not coming</th><th>No answer</th><th>Attendance</th></tr>
+          </thead>
+          <tbody id="stats-body"></tbody>
+        </table>
+        <p id="stats-empty" class="empty" hidden>Add players to see their attendance.</p>
+      </section>
     </section>
   </main>
 

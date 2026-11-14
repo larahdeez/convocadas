@@ -174,6 +174,37 @@ function selectEvent(id) {
   loadEvents();
 }
 
+// ---------- US-05 · Attendance stats ----------
+
+async function loadStats() {
+  const type = $('#stats-type').value;
+  const stats = await api('GET', `/api/stats${type ? `?type=${type}` : ''}`);
+  const label = { '': 'events', match: 'matches', training: 'training sessions' }[type];
+  $('#stats-summary').textContent = stats.totalEvents === 0
+    ? `No ${label} yet.`
+    : `${stats.totalEvents} ${label} · team average attendance ${stats.teamRate}%`;
+  $('#stats-body').replaceChildren(
+    ...stats.players.map((p) =>
+      el('tr', {},
+        el('td', {}, p.name),
+        el('td', { class: 'num' }, String(p.coming)),
+        el('td', { class: 'num' }, String(p.notComing)),
+        el('td', { class: 'num' }, String(p.noAnswer)),
+        el('td', {},
+          el('div', { class: 'rate' },
+            el('div', { class: 'bar' }, el('span', { style: `width: ${p.rate}%` })),
+            `${p.rate}%`,
+          ),
+        ),
+      )
+    )
+  );
+  $('#stats-table').hidden = stats.players.length === 0;
+  $('#stats-empty').hidden = stats.players.length > 0;
+}
+
+$('#stats-type').addEventListener('change', () => loadStats().catch(() => {}));
+
 // ---------- Event list ----------
 
 async function loadEvents() {
@@ -193,6 +224,7 @@ async function loadEvents() {
   $('#event-empty').hidden = events.length > 0;
   if (!state.selected && events.length) state.selected = events[0].id;
   await loadSquad();
+  await loadStats();
 }
 
 (async () => {
