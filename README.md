@@ -30,20 +30,26 @@ Final project for the course *Building Digital Products with Generative AI* (202
 | US-02 | As a **player**, I want to **say whether I'm coming to an event**, so that **the coach can plan ahead**. | ✅ |
 | US-03 | As a **coach**, I want to **see who's coming, who isn't and who hasn't answered for each event**, so that **I can pick the squad without asking everyone one by one**. | ✅ |
 
+### Version 0.2.0
+
+| ID | User story | Status |
+|---|---|---|
+| US-05 | As a **coach**, I want to **see attendance statistics per player**, so that **I know how committed the team is**. | ✅ |
+
 **Main acceptance criteria**
 - US-01: type, date, time and location are required; past dates and impossible dates (e.g. 30 February) are rejected; the list only shows upcoming events, sorted by date and time.
 - US-02: each player picks her name (or adds herself to the roster) and clicks "Coming" / "Not coming"; she can change her mind; past events can't be answered.
 - US-03: clicking an event shows three columns (Coming / Not coming / No answer yet) with their counts; it refreshes automatically every 4 seconds.
+- US-05: a table shows, for each player, how many events she's coming to, not coming to and hasn't answered, plus her attendance rate (events she's coming to ÷ all events, rounded). Players are sorted by attendance rate, the team average is shown, and the stats can be filtered by matches or training.
 
-### Backlog (outside the MVP)
+### Backlog
 
 | ID | User story |
 |---|---|
 | US-04 | As a player, I want to get a notification when an event is created, so that I don't find out too late. |
-| US-05 | As a coach, I want to see attendance statistics per player, so that I know how committed the team is. |
 | US-06 | As a coach, I want AI to suggest the squad based on attendance, so that I can decide faster. |
 
-**Why this cut:** without US-01 to US-03 there is no value, because you can't know who's coming. Notifications, statistics or AI improve the product, but they aren't essential to solve the problem.
+**Why this cut:** without US-01 to US-03 there is no value, because you can't know who's coming. Notifications, statistics or AI improve the product, but they aren't essential to solve the problem. Once the MVP was working, attendance statistics (US-05) were the first backlog item added, in version 0.2.0.
 
 ---
 
@@ -92,13 +98,14 @@ Open the folder in VS Code → *Reopen in Container* → `npm run dev`.
 ```bash
 npm test
 ```
-35 tests (server health, US-01, US-02 and US-03). Each test starts the server with an in-memory database and a fixed clock, so results don't depend on the day they run.
+44 tests (server health, US-01, US-02, US-03 and US-05). Each test starts the server with an in-memory database and a fixed clock, so results don't depend on the day they run.
 
 ### Demo walkthrough
 1. Open the app in two browser tabs.
 2. **Tab 1 (coach):** leave "Who are you?" as "I'm the coach" and create Saturday's match.
 3. **Tab 2 (player):** add your name and click "✔ Coming" on the match.
 4. Go back to tab 1: within a few seconds the player shows up under "Coming", without reloading.
+5. Scroll down to **Attendance stats** to see each player's attendance rate, and filter it by matches or training.
 
 ### API
 
@@ -110,6 +117,7 @@ npm test
 | GET | `/api/players/:id/attendance` | US-02 |
 | PUT | `/api/events/:id/attendance` | US-02 |
 | GET | `/api/events/:id/squad` | US-03 |
+| GET | `/api/stats?type=match\|training` | US-05 |
 
 ### Deployment
 Deployed on **Render** as a Docker web service, from the `main` branch on GitHub:
@@ -135,6 +143,7 @@ Deployed on **Render** as a Docker web service, from the `main` branch on GitHub
    - `feature/attendance` (US-02)
    - `feature/squad-view` (US-03)
 5. **Release and deployment:** merge `develop` into `main` as `v0.1.0` and deploy on Render from `main`.
+6. **Version 0.2.0:** the first backlog story, `feature/attendance-stats` (US-05), following the same loop, released as `v0.2.0`.
 
 You can see the history with `git log --oneline --graph --all`.
 
@@ -179,10 +188,11 @@ and don't add anything that isn't in the criteria.
 | US-01 | ✅ | With field validation, past dates and impossible dates |
 | US-02 | ✅ | Includes the player roster and changing your answer |
 | US-03 | ✅ | With counts and auto-refresh |
+| US-05 | ✅ | Per-player rate, team average and match/training filter (v0.2.0) |
 
 ### What works
-- The three MVP stories, end to end, locally, in Docker and in production.
-- 35 automated tests, all green.
+- The three MVP stories and the attendance statistics, end to end, locally, in Docker and in production.
+- 44 automated tests, all green.
 - Runs with `npm start` without installing anything, and with Docker (`docker compose up --build`), tested on Windows with Docker Desktop.
 - Deployed and available at https://convocadas.onrender.com.
 
@@ -191,12 +201,12 @@ and don't add anything that isn't in the criteria.
 - **A single team:** there's no separation between different teams.
 - **Events and players can't be edited or deleted** (not part of the MVP criteria).
 - **Production data isn't permanent:** on Render's free plan it's wiped when the service restarts or is redeployed.
+- **Attendance rates count every event:** a player who joins the roster late starts with a lower rate, because events before she joined count as "no answer".
 
 ### Natural next step
 1. **Persistent data in production:** add a persistent disk on Render or move to PostgreSQL.
 2. **Simple login** (magic link by email) so each player can only answer for herself.
 3. **US-04, notifications:** a notification when an event is created.
-4. **US-05, attendance statistics.**
 
 ---
 
@@ -214,7 +224,8 @@ and don't add anything that isn't in the criteria.
 │       ├── events.js      # US-01
 │       ├── players.js     # US-02 (roster)
 │       ├── attendance.js  # US-02
-│       └── squad.js       # US-03
+│       ├── squad.js       # US-03
+│       └── stats.js       # US-05
 ├── public/                # web interface (index.html, app.js, styles.css)
 ├── tests/                 # node:test
 ├── docs/
