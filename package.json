@@ -1,6 +1,6 @@
 {
   "name": "convocadas",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Squad call-ups and attendance for futsal teams",
   "main": "src/server.js",
   "engines": {
