@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: /app/data/convocadas.db
+    volumes:
+      - convocadas-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  convocadas-data:
