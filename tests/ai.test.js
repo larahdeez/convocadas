@@ -69,3 +69,32 @@ test('rejects empty or non-JSON answers', async () => {
   });
   await assert.rejects(() => notJson.generateJson('x', {}), /not valid JSON/);
 });
+
+test('retries when the model is overloaded (503) and succeeds', async () => {
+  let calls = 0;
+  const ai = createGeminiClient({
+    apiKey: 'k',
+    retryDelayMs: 0,
+    fetchImpl: async () => (++calls < 3 ? { ok: false, status: 503, json: async () => ({}) } : geminiReply({ squad: ['Ana'] })),
+  });
+  assert.deepEqual(await ai.generateJson('x', {}), { squad: ['Ana'] });
+  assert.equal(calls, 3);
+});
+
+test('gives up after the retries with a clear message', async () => {
+  let calls = 0;
+  const ai = createGeminiClient({
+    apiKey: 'k',
+    retryDelayMs: 0,
+    fetchImpl: async () => { calls++; return { ok: false, status: 503, json: async () => ({}) }; },
+  });
+  await assert.rejects(() => ai.generateJson('x', {}), /busy right now/);
+  assert.equal(calls, 3);
+});
+
+test('does not retry on client errors', async () => {
+  let calls = 0;
+  const ai = createGeminiClient({ apiKey: 'k', retryDelayMs: 0, fetchImpl: async () => { calls++; return { ok: false, status: 400, json: async () => ({}) }; } });
+  await assert.rejects(() => ai.generateJson('x', {}), /\(400\)/);
+  assert.equal(calls, 1);
+});
