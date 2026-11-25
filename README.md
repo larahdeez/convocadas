@@ -36,27 +36,33 @@ Final project for the course *Building Digital Products with Generative AI* (202
 |---|---|---|
 | US-05 | As a **coach**, I want to **see attendance statistics per player**, so that **I know how committed the team is**. | ✅ |
 
+### Version 0.3.0: AI in the product
+
+| ID | User story | Status |
+|---|---|---|
+| US-06 | As a **coach**, I want **AI to suggest the squad for an event** based on the answers and attendance history, so that **I can decide faster**. | ✅ |
+
 **Main acceptance criteria**
 - US-01: type, date, time and location are required; past dates and impossible dates (e.g. 30 February) are rejected; the list only shows upcoming events, sorted by date and time.
 - US-02: each player picks her name (or adds herself to the roster) and clicks "Coming" / "Not coming"; she can change her mind; past events can't be answered.
 - US-03: clicking an event shows three columns (Coming / Not coming / No answer yet) with their counts; it refreshes automatically every 4 seconds.
 - US-05: a table shows, for each player, how many events she's coming to, not coming to and hasn't answered, plus her attendance rate (events she's coming to ÷ all events, rounded). Players are sorted by attendance rate, the team average is shown, and the stats can be filtered by matches or training.
+- US-06: in the squad panel, "✨ Suggest squad with AI" asks a language model (Google Gemini) for a squad of up to 12 players. The AI may only pick players who are coming, prefers those with the best attendance, lists who hasn't answered and is worth contacting, and explains its choice in two or three sentences. The server checks the answer: invented names, players who aren't coming and duplicates are discarded. If the AI isn't set up or fails, the coach sees a clear message and the rest of the app keeps working.
 
 ### Backlog
 
 | ID | User story |
 |---|---|
 | US-04 | As a player, I want to get a notification when an event is created, so that I don't find out too late. |
-| US-06 | As a coach, I want AI to suggest the squad based on attendance, so that I can decide faster. |
 
-**Why this cut:** without US-01 to US-03 there is no value, because you can't know who's coming. Notifications, statistics or AI improve the product, but they aren't essential to solve the problem. Once the MVP was working, attendance statistics (US-05) were the first backlog item added, in version 0.2.0.
+**Why this cut:** without US-01 to US-03 there is no value, because you can't know who's coming. Notifications, statistics or AI improve the product, but they aren't essential to solve the problem. Once the MVP was working, attendance statistics (US-05) were the first backlog item added, in version 0.2.0, and the AI squad suggestion (US-06) followed in version 0.3.0.
 
 ---
 
 ## 3. How to run it
 
 ### Stack
-Node.js 22+ **with no external dependencies**: server with `node:http`, SQLite database with `node:sqlite` and tests with `node:test`. Plain HTML, CSS and JavaScript frontend with no frameworks. No `npm install` needed.
+Node.js 22+ **with no external dependencies**: server with `node:http`, SQLite database with `node:sqlite` and tests with `node:test`. Plain HTML, CSS and JavaScript frontend with no frameworks. No `npm install` needed. The AI squad suggestion uses the **Google Gemini API** (free tier), called from the server.
 
 ### Option A: with Docker (recommended)
 Requirements: [Docker](https://www.docker.com/) with Docker Compose.
@@ -91,14 +97,22 @@ Open the folder in VS Code → *Reopen in Container* → `npm run dev`.
 |---|---|---|
 | `PORT` | Server port | `3000` |
 | `DATABASE_PATH` | Path to the SQLite file | `./data/convocadas.db` |
+| `GEMINI_API_KEY` | Key for the Google Gemini API (US-06). Optional: without it, everything works except the AI suggestion | *(empty)* |
+| `GEMINI_MODEL` | Gemini model ID, as shown in Google AI Studio | `gemini-flash-lite-latest` |
 
-`.env` is **never** committed (it's in `.gitignore`); only `.env.example` is versioned. The project uses no API keys or secrets.
+`.env` is **never** committed (it's in `.gitignore`); only `.env.example` is versioned. The only secret is `GEMINI_API_KEY`.
+
+### Setting up the AI (free)
+1. Go to **https://aistudio.google.com/apikey**, sign in with a Google account and create an API key. The Gemini API has a free tier: no card is needed, and when the free quota runs out the API simply answers "too many requests" instead of charging.
+2. **Locally:** put it in `.env` as `GEMINI_API_KEY=...` (Docker Compose reads it from there too).
+3. **On Render:** service → **Environment** → add `GEMINI_API_KEY` → save. Render redeploys automatically.
+4. When the server starts, the log says `AI suggestions enabled (model: ...)`.
 
 ### Tests
 ```bash
 npm test
 ```
-44 tests (server health, US-01, US-02, US-03 and US-05). Each test starts the server with an in-memory database and a fixed clock, so results don't depend on the day they run.
+65 tests (server health, US-01, US-02, US-03, US-05, US-06 and the Gemini client). The AI tests use a fake AI client, so they need no key and no internet connection. Each test starts the server with an in-memory database and a fixed clock, so results don't depend on the day they run.
 
 ### Demo walkthrough
 1. Open the app in two browser tabs.
@@ -106,6 +120,7 @@ npm test
 3. **Tab 2 (player):** add your name and click "✔ Coming" on the match.
 4. Go back to tab 1: within a few seconds the player shows up under "Coming", without reloading.
 5. Scroll down to **Attendance stats** to see each player's attendance rate, and filter it by matches or training.
+6. In the squad panel, click **✨ Suggest squad with AI** to get the AI's suggested squad, who to contact and why.
 
 ### API
 
@@ -118,6 +133,7 @@ npm test
 | PUT | `/api/events/:id/attendance` | US-02 |
 | GET | `/api/events/:id/squad` | US-03 |
 | GET | `/api/stats?type=match\|training` | US-05 |
+| POST | `/api/events/:id/suggestion` (optional body `{ "squadSize": 5-14 }`) | US-06 |
 
 ### Deployment
 Deployed on **Render** as a Docker web service, from the `main` branch on GitHub:
@@ -144,6 +160,7 @@ Deployed on **Render** as a Docker web service, from the `main` branch on GitHub
    - `feature/squad-view` (US-03)
 5. **Release and deployment:** merge `develop` into `main` as `v0.1.0` and deploy on Render from `main`.
 6. **Version 0.2.0:** the first backlog story, `feature/attendance-stats` (US-05), following the same loop, released as `v0.2.0`.
+7. **Version 0.3.0:** `feature/ai-squad-suggestion` (US-06), which adds generative AI inside the product, released as `v0.3.0`.
 
 You can see the history with `git log --oneline --graph --all`.
 
@@ -177,6 +194,10 @@ and don't add anything that isn't in the criteria.
 - **No login in the MVP:** each player identifies herself by picking her name from a list. Good enough for a team that knows each other, but not secure (see limitations).
 - **Injectable clock (`now`) on the server:** the tests use a fixed date so that "past dates are rejected" can always be checked the same way.
 - **Auto-refresh every 4 s** instead of WebSockets: simpler and good enough for the demo.
+- **Google Gemini for the AI feature:** its API has a free tier with no card, and it's one of the AI platforms covered in the course. It's called with Node's built-in `fetch`, so the project still has no dependencies, and the model can be changed with `GEMINI_MODEL` without touching the code. The default is the Flash-Lite model: the regular Flash model often answered "overloaded" (503) on the free tier during testing, while Flash-Lite responded reliably.
+- **The AI suggests, the server decides:** the model is asked for structured JSON, and the server only accepts names of real players who are coming. The coach always sees it as a suggestion to review.
+- **Only what's needed goes to the AI:** first names, answers and attendance figures. Nothing else about the players is sent.
+- **Injectable AI client:** the tests replace Gemini with a fake client, so they're fast, free and deterministic.
 
 ---
 
@@ -191,8 +212,8 @@ and don't add anything that isn't in the criteria.
 | US-05 | ✅ | Per-player rate, team average and match/training filter (v0.2.0) |
 
 ### What works
-- The three MVP stories and the attendance statistics, end to end, locally, in Docker and in production.
-- 44 automated tests, all green.
+- The three MVP stories, the attendance statistics and the AI squad suggestion, end to end, locally, in Docker and in production.
+- 65 automated tests, all green.
 - Runs with `npm start` without installing anything, and with Docker (`docker compose up --build`), tested on Windows with Docker Desktop.
 - Deployed and available at https://convocadas.onrender.com.
 
@@ -201,6 +222,8 @@ and don't add anything that isn't in the criteria.
 - **A single team:** there's no separation between different teams.
 - **Events and players can't be edited or deleted** (not part of the MVP criteria).
 - **Production data isn't permanent:** on Render's free plan it's wiped when the service restarts or is redeployed.
+- **The AI depends on an external free service:** Google sometimes answers "model overloaded" (503) on the free tier; the server retries twice before giving up. If the free quota runs out or Google is still unavailable, the suggestion shows an error until it recovers (the rest of the app is unaffected). On the free tier, Google may use the requests to improve its products, which is why only first names and attendance figures are sent.
+- **The real AI call can't be covered by automated tests:** they use a fake client; the real Gemini call is checked by hand.
 - **Attendance rates count every event:** a player who joins the roster late starts with a lower rate, because events before she joined count as "no answer".
 
 ### Natural next step
@@ -220,15 +243,16 @@ and don't add anything that isn't in the criteria.
 │   ├── app.js             # HTTP server and router
 │   ├── http.js            # helpers (JSON, errors, static files)
 │   ├── db.js              # SQLite schema
+│   ├── ai.js              # Google Gemini client (US-06)
 │   └── routes/
 │       ├── events.js      # US-01
 │       ├── players.js     # US-02 (roster)
 │       ├── attendance.js  # US-02
 │       ├── squad.js       # US-03
-│       └── stats.js       # US-05
+│       ├── stats.js       # US-05
+│       └── suggestion.js  # US-06 (AI)
 ├── public/                # web interface (index.html, app.js, styles.css)
 ├── tests/                 # node:test
-├── docs/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .env.example
