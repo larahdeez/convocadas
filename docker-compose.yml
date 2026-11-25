@@ -6,6 +6,8 @@ services:
     environment:
       PORT: 3000
       DATABASE_PATH: /app/data/convocadas.db
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
     volumes:
       - convocadas-data:/app/data
     restart: unless-stopped
