@@ -145,3 +145,10 @@ form button[type="submit"] { margin-top: 14px; width: 100%; }
 .bar { flex: 1; height: 8px; background: #eef1f4; border-radius: 999px; overflow: hidden; }
 .bar span { display: block; height: 100%; background: var(--brand); border-radius: 999px; }
 .stats th:nth-child(2), .stats th:nth-child(3), .stats th:nth-child(4) { text-align: center; }
+
+.ai { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.ai-result { margin-top: 12px; background: #f3f0ff; border: 1px solid #e0d8ff; border-radius: 10px; padding: 12px 14px; }
+.ai-result h3 { margin: 0 0 6px; font-size: 0.95rem; color: #4b2db3; }
+.ai-result ol { margin: 0 0 8px; padding-left: 22px; }
+.ai-result p { margin: 6px 0 0; }
+.ai-reasoning { font-style: italic; }

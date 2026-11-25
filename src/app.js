@@ -6,9 +6,9 @@ const { HttpError, sendJson, readJson, serveStatic } = require('./http');
 /**
  * Creates the HTTP server.
  * @param {import('node:sqlite').DatabaseSync} db
- * @param {{ now?: () => Date }} options  `now` is injectable so tests can use a fixed clock.
+ * @param {{ now?: () => Date, ai?: object }} options  `now` and `ai` are injectable so tests can use a fixed clock and a fake AI.
  */
-function createApp(db, { now = () => new Date() } = {}) {
+function createApp(db, { now = () => new Date(), ai = null } = {}) {
   const routes = [];
   const router = {
     add(method, pattern, handler) {
@@ -21,7 +21,7 @@ function createApp(db, { now = () => new Date() } = {}) {
   // Each file in src/routes registers the endpoints of one user story.
   const routesDir = path.join(__dirname, 'routes');
   for (const file of fs.readdirSync(routesDir).filter((f) => f.endsWith('.js')).sort()) {
-    require(path.join(routesDir, file))(router, db, { now });
+    require(path.join(routesDir, file))(router, db, { now, ai });
   }
 
   return http.createServer(async (req, res) => {

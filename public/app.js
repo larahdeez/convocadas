@@ -170,9 +170,46 @@ async function loadSquad() {
 }
 
 function selectEvent(id) {
+  if (id !== state.selected) { state.aiFor = null; showAi(); }
   state.selected = id;
   loadEvents();
 }
+
+// ---------- US-06 · AI squad suggestion ----------
+
+state.aiFor = null;
+
+function showAi(...children) {
+  const box = $('#ai-result');
+  box.replaceChildren(...children);
+  box.hidden = children.length === 0;
+}
+
+$('#ai-button').addEventListener('click', async () => {
+  const eventId = state.selected;
+  if (!eventId) return;
+  const button = $('#ai-button');
+  button.disabled = true;
+  button.textContent = '✨ Thinking…';
+  showAi(el('p', { class: 'hint' }, 'Asking the AI for a suggestion…'));
+  try {
+    const s = await api('POST', `/api/events/${eventId}/suggestion`, {});
+    state.aiFor = eventId;
+    showAi(
+      el('h3', {}, `Suggested squad (${s.squad.length})`),
+      el('ol', {}, ...s.squad.map((name) => el('li', {}, name))),
+      ...(s.followUp.length ? [el('p', {}, el('strong', {}, 'Worth contacting: '), s.followUp.join(', '))] : []),
+      ...(s.reasoning ? [el('p', { class: 'ai-reasoning' }, s.reasoning)] : []),
+      el('p', { class: 'hint' }, `Suggested by AI (${s.model}). Review it before confirming the squad.`),
+    );
+  } catch (err) {
+    state.aiFor = eventId;
+    showAi(el('p', { class: 'message error' }, err.message));
+  } finally {
+    button.disabled = false;
+    button.textContent = '✨ Suggest squad with AI';
+  }
+});
 
 // ---------- US-05 · Attendance stats ----------
 

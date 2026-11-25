@@ -4,9 +4,9 @@ const { createApp } = require('../src/app');
 // Fixed clock for every test: Wednesday 12 November 2026, 10:00 local time.
 const FIXED_NOW = new Date(2026, 10, 12, 10, 0, 0);
 
-async function startServer({ now = () => FIXED_NOW } = {}) {
+async function startServer({ now = () => FIXED_NOW, ai = null } = {}) {
   const db = openDb(':memory:');
-  const server = createApp(db, { now });
+  const server = createApp(db, { now, ai });
   await new Promise((resolve) => server.listen(0, resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
 
