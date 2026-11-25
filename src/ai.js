@@ -2,7 +2,7 @@
 // No SDK needed: one POST to generateContent asking for a JSON answer.
 
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = 'gemini-flash-latest';
+const DEFAULT_MODEL = 'gemini-flash-lite-latest';
 
 class AiError extends Error {}
 
